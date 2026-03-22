@@ -37,36 +37,40 @@
 #include <sys/wait.h> // waitpid
 using namespace std;
 int main() {
-    int fd[2];
-    
-    // 1. 创建管道
-    pipe(fd); 
-    
-    pid_t pid = fork();
-    
-    if (pid == 0) {
-        // 子进程：
-        // 关闭读端 fd[0]
-        close(fd[0]);//子进程不读
-        // 用 write() 往 fd[1] 写 "hello from child\n"
-        const char *msg="hello from child";
-        write(fd[1],msg,strlen(msg));
-        // 关闭写端，退出
-        close(fd[1]);
-        _exit(0);
-        
-    } else {
-        // 父进程：
-        // 关闭写端 fd[1]
-        close(fd[1]);
+ int fd_in[2];   // 父→子
+int fd_out[2];  // 子→父
+
+pipe(fd_in);
+pipe(fd_out);
+
+pid_t pid = fork();
+
+if (pid == 0) {
+    // 子进程：
+    // fd_in  ：只留读端  fd_in[0]，关掉 fd_in[1]
+    close(fd_in[1]);
+    // fd_out ：只留写端  fd_out[1]，关掉 fd_out[0]
+    close(fd_out[0]);
+    // 用 read 从 fd_in[0] 读数据
+    char buffer[128]={};
+    read(fd_in[0],buffer,sizeof(buffer));
+    // 用 write 往 fd_out[1] 写 "pong\n"
+   const char*msg="pong\n";
+   write(fd_out[1],msg,strlen(msg));
+} else {
+    // 父进程：
+    // fd_in  ：只留写端  fd_in[1]，关掉 fd_in[0]
+    close(fd_in[0]);
+    // fd_out ：只留读端  fd_out[0]，关掉 fd_out[1]
+    close(fd_out[1]);
+    // 用 write 往 fd_in[1] 写 "ping\n"
+    const char *msg="ping\n";
+    write(fd_in[1],msg,strlen(msg));
+    // 用 read 从 fd_out[0] 读回来，打印
 char buffer[128]={};
-        // 用 read() 从 fd[0] 读数据，打印
-        read(fd[0],buffer,sizeof(buffer));
-        cout<<"父进程收到"<<buffer;
-        // waitpid 等子进程结束
+read(fd_out[0],buffer,sizeof(buffer));
+cout<<"父进程收到"<<buffer;
 waitpid(pid,NULL,0);
-
-
-    }
-    return 0;
+}
+return 0;
 }
