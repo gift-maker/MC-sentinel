@@ -1,5 +1,6 @@
 #include "ProcessMgr.h"
 #include<unistd.h>
+#include<sys/wait.h>
 ProcessMgr::ProcessMgr(const std::string&command)
 {
     this->command_=command;
@@ -41,5 +42,16 @@ void ProcessMgr::start()
     }
 }
 ProcessMgr::~ProcessMgr(){};
+bool ProcessMgr::isAlive()
+{
+int res=waitpid(child_pid_,NULL,WNOHANG);//WNOHANG意思是不阻塞
+//如果返回值是0说明活着，返回true
+if(res==0)return true;
+//否则返回 false 将child_pid_置为-1
+else {
+child_pid_=-1;//说明有一个进程阻塞
+return false;
 
+}
+}
 
