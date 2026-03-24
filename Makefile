@@ -1,5 +1,5 @@
 CXX      = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -pthread
+CXXFLAGS = -std=c++17 -Wall -Wextra -pthread -Iinclude
 TARGET   = bin/mc-sentinel
 
 SRCS = $(wildcard src/*.cpp)
