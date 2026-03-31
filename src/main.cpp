@@ -19,7 +19,7 @@ signal(SIGINT,handler);//截取信号，实现函数
 ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
 BackupMgr backup("/tmp/mc-backups", "/tmp/mc-world", 5);//test创建一个备份对象
 proc.start();//调用成员函数启动进程
-proc.sendCommand("Can't Keep Up"); //test
+
 //只要子进程挂了就直接重启
 while(running)
 {
@@ -82,7 +82,7 @@ proc.stop();
 
 //子进程启动成功
 
-std::cout<<"子进程启动成功.PID："<<std::endl;
+std::cout<< "[Sentinel] 已安全退出"<<std::endl;
 
 return 0;
 }
