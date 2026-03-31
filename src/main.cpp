@@ -3,6 +3,7 @@
 #include<csignal>
 #include<unistd.h>
 #include<fcntl.h>
+#include<regex>
 //定义全局变量running 判断程序是不是在运行
 bool running =true;
 void handler(int /*sig*/)
@@ -16,7 +17,7 @@ int main(){
 signal(SIGINT,handler);//截取信号，实现函数
 ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
 proc.start();//调用成员函数启动进程
-proc.sendCommand("hello from sentinel"); //test
+proc.sendCommand("PlayerName joined the game"); //test
 //只要子进程挂了就直接重启
 while(running)
 {
@@ -43,6 +44,15 @@ std::string line=proc.readOutput();
 if(!line.empty())
 {
     std::cout<<"MC输出:"<<line;
+    //匹配玩家登录
+    std::regex joinPattern("(\\w+) joined the game");
+    std::smatch match;
+    if(std::regex_search(line,match,joinPattern))
+    {
+
+std::cout<<"[事件]玩家登录："<<match[1]<<std::endl;
+
+    }
 
 }
 
