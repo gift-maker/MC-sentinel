@@ -1,5 +1,6 @@
 #include<iostream>
 #include "ProcessMgr.h"
+#include"BackupMgr.h"
 #include<csignal>
 #include<unistd.h>
 #include<fcntl.h>
@@ -16,13 +17,14 @@ running =false;
 int main(){
 signal(SIGINT,handler);//截取信号，实现函数
 ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
+BackupMgr backup("/tmp/mc-backups", "/tmp/mc-world", 5);//test创建一个备份对象
 proc.start();//调用成员函数启动进程
 proc.sendCommand("Can't Keep Up"); //test
 //只要子进程挂了就直接重启
 while(running)
 {
 sleep(1);//每秒检查一下
-
+backup.tick();//test调用备份 每5s
 //如果子进程挂了就重启
 if(!proc.isAlive())//子进程挂了
 {
@@ -43,7 +45,7 @@ proc.start();//重新启动当前进程
 std::string line=proc.readOutput();
 if(!line.empty())
 {
-    std::cout<<"MC输出:"<<line;
+    std::cout<<"[MC输出]:"<<line;
     //匹配玩家登录
     std::regex joinPattern("(\\w+) joined the game");
     std::smatch match;
@@ -70,18 +72,7 @@ std::cout<<"[事件]服务器警告:TPS过低"<<std::endl;
 
     }
 
-
-
-
-
-
 }
-
-
-
-
-
-
 }
 }
 
