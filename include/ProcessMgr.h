@@ -13,6 +13,7 @@ void start();
 bool  isAlive();
 void sendCommand(std::string& command);
 std::string readOutput();
+long getmemoryKB();//返回子进程RSS内存  KB
 private:
 std::string command_;//表示要执行的命令
 pid_t child_pid_=-1 ;//子进程pid=-1表示没有启动

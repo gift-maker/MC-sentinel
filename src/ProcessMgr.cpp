@@ -72,3 +72,26 @@ write(fd_in[1],str,strlen(str));
 
 
 } 
+long ProcessMgr::getmemoryKB()
+{
+std::string path ="/proc/"+std::to_string(child_pid_)+"/status";//将路径拼接好，子进程路径
+FILE* fp = fopen(path.c_str(), "r");
+if (fp == nullptr) {
+    return -1; // 打开文件失败
+}
+else{
+    char line[256];//定义一个字符数组装读到的行
+    while(fgets(line,sizeof(line),fp)!=NULL)
+    {
+if(strncmp(line,"VmRSS:",6)==0)
+{
+long value;
+sscanf(line,"VmRSS:%ld",&value);
+fclose(fp);
+return value;
+}    }
+
+return -1;
+
+} 
+}
