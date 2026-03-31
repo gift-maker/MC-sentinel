@@ -17,7 +17,7 @@ int main(){
 signal(SIGINT,handler);//截取信号，实现函数
 ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
 proc.start();//调用成员函数启动进程
-proc.sendCommand("PlayerName joined the game"); //test
+proc.sendCommand("Can't Keep Up"); //test
 //只要子进程挂了就直接重启
 while(running)
 {
@@ -53,6 +53,27 @@ if(!line.empty())
 std::cout<<"[事件]玩家登录："<<match[1]<<std::endl;
 
     }
+    //匹配玩家退出
+    std::regex exitpattern("(\\w+) left the game");
+    std::smatch match1;
+    if(std::regex_search(line,match1,exitpattern))
+    { 
+
+std::cout<<"[事件]玩家退出:"<<match1[1]<<std::endl;
+
+    }
+    std::regex cannotpattern("Can't Keep Up");
+    if(std::regex_search(line,cannotpattern))
+    { 
+
+std::cout<<"[事件]服务器警告:TPS过低"<<std::endl;
+
+    }
+
+
+
+
+
 
 }
 
