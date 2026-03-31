@@ -25,8 +25,17 @@ std::cout<<"子进程挂了,重启中..."<<std::endl;
 proc.start();//重启
 }
 else {
-std::cout<<"子进程存活  内存占用："<<proc.getmemoryKB()<<"KB"<<std::endl;
+long mem =proc.getmemoryKB();
+    std::cout<<"子进程存活  内存占用："<<mem<<"KB"<<std::endl;
+if(mem>4096000)
+{
+std::cout<<"内存占用超出阈值，重启中..."<<std::endl;
+proc.stop();//停止当前进程
+proc.start();//重新启动当前进程
 
+
+
+}
 }
 }
 
