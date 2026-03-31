@@ -2,6 +2,7 @@
 #include<unistd.h>
 #include<sys/wait.h>
 #include<cstring>
+#include<fcntl.h>
 ProcessMgr::ProcessMgr(const std::string&command)//构造函数实现
 {
     this->command_=command;
@@ -9,6 +10,7 @@ ProcessMgr::ProcessMgr(const std::string&command)//构造函数实现
 
 }
 ProcessMgr::~ProcessMgr(){};//析构函数实现
+//进程开始函数
 void ProcessMgr::start()
 {
     // 1. 创建两对管道
@@ -41,9 +43,10 @@ void ProcessMgr::start()
         // 8. 关掉不用的端
         close(fd_in[0]); // fd_in_ 关读端
         close(fd_out[1]); // fd_out_ 关写端
+        fcntl(fd_out[0],F_SETFL,O_NONBLOCK);//这个read()默认是阻塞的  将其设置为非阻塞，没数据就返回空
     }
 }
-
+//判断进程是否存活
 bool ProcessMgr::isAlive()
 {
 int res=waitpid(child_pid_,NULL,WNOHANG);//WNOHANG意思是不阻塞
@@ -56,6 +59,7 @@ return false;
 
 }
 }
+//停止进程
 void ProcessMgr::stop()
 {std::string str="stop";
     
@@ -65,13 +69,15 @@ close(fd_in[1]);//关闭写端
 close(fd_out[0]);//关闭读端
 
 }
-void ProcessMgr::sendCommand(std::string&cmd)
+//读取输入的指令
+void ProcessMgr::sendCommand(const std::string&cmd)
 {std::string line = cmd + "\n";//因为指令服务是按照行读取的因此要进行加\n
     const char*str=line.c_str();
 write(fd_in[1],str,strlen(str));
 
 
 } 
+//获取内存
 long ProcessMgr::getmemoryKB()
 {
 std::string path ="/proc/"+std::to_string(child_pid_)+"/status";//将路径拼接好，子进程路径
@@ -94,4 +100,21 @@ return value;
 return -1;
 
 } 
+}
+//读取输出
+std::string ProcessMgr::readOutput()
+{
+std::string result;
+char c;
+while(true)
+{
+ssize_t n=read(fd_out[0],&c,1);//每次读一个字符，将字符传到c中，将数量传到n中
+if(n<=0)break;  // n == 0：没数据了
+                // n == -1：非阻塞模式下没数据也返回 -1
+result+=c;
+if(c=='\n')break;
+
+}
+return result;
+
 }

@@ -11,7 +11,7 @@ ProcessMgr(const std::string&command);//构造函数
 void stop();
 void start();
 bool  isAlive();
-void sendCommand(std::string& command);
+void sendCommand(const std::string& command);
 std::string readOutput();
 long getmemoryKB();//返回子进程RSS内存  KB
 private:
