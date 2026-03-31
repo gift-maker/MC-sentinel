@@ -16,14 +16,16 @@ running =false;
 
 int main(){
 signal(SIGINT,handler);//截取信号，实现函数
-ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
-BackupMgr backup("/tmp/mc-backups", "/tmp/mc-world", 5);//test创建一个备份对象
+//ProcessMgr proc("/bin/cat");//定义一个对象，初始填入bin/cat这个路径
+//BackupMgr backup("/tmp/mc-backups", "/tmp/mc-world", 5);//test创建一个备份对象
+ProcessMgr proc("java -Xmx2G -Xms1G -jar /home/cuixi/minecraft/server.jar nogui");//实际路径
+BackupMgr backup("/home/cuixi/minecraft/backups", "/home/cuixi/minecraft/world", 21600);
 proc.start();//调用成员函数启动进程
-
+std::cout<<"等待MC启动"<<std::endl;
 //只要子进程挂了就直接重启
 while(running)
 {
-sleep(1);//每秒检查一下
+sleep(20);//每秒检查一下
 backup.tick();//test调用备份 每5s
 //如果子进程挂了就重启
 if(!proc.isAlive())//子进程挂了

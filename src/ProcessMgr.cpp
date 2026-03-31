@@ -3,6 +3,7 @@
 #include<sys/wait.h>
 #include<cstring>
 #include<fcntl.h>
+#include<iostream>
 ProcessMgr::ProcessMgr(const std::string&command)//构造函数实现
 {
     this->command_=command;
@@ -33,8 +34,16 @@ void ProcessMgr::start()
 
         // 6. 执行命令，execvp 需要 char* argv[]
         // 这里先简单处理：用 execl 执行 /bin/sh -c command_
-        execl("/bin/sh", "sh", "-c", command_.c_str(), nullptr);
-
+       // execl("/bin/sh", "sh", "-c", command_.c_str(), nullptr);
+// 实际处理直接执行 java，不经过 sh
+const char* args[] = {
+    "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+    "-Xmx2G", "-Xms1G",
+    "-jar", "/home/cuixi/minecraft/server.jar",
+    "nogui", nullptr
+};
+chdir("/home/cuixi/minecraft");  // 切换到 MC 目录
+execvp("/usr/lib/jvm/java-21-openjdk-amd64/bin/java", (char* const*)args);
         // 7. execl 失败会到这里
         _exit(1);
     }
@@ -44,6 +53,7 @@ void ProcessMgr::start()
         close(fd_in[0]); // fd_in_ 关读端
         close(fd_out[1]); // fd_out_ 关写端
         fcntl(fd_out[0],F_SETFL,O_NONBLOCK);//这个read()默认是阻塞的  将其设置为非阻塞，没数据就返回空
+    std::cout << "[debug] child_pid=" << child_pid_ << std::endl;  // 加这行
     }
 }
 //判断进程是否存活
