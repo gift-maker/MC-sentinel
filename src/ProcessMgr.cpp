@@ -1,12 +1,14 @@
 #include "ProcessMgr.h"
 #include<unistd.h>
 #include<sys/wait.h>
-ProcessMgr::ProcessMgr(const std::string&command)
+#include<cstring>
+ProcessMgr::ProcessMgr(const std::string&command)//构造函数实现
 {
     this->command_=command;
 
 
 }
+ProcessMgr::~ProcessMgr(){};//析构函数实现
 void ProcessMgr::start()
 {
     // 1. 创建两对管道
@@ -41,7 +43,7 @@ void ProcessMgr::start()
         close(fd_out[1]); // fd_out_ 关写端
     }
 }
-ProcessMgr::~ProcessMgr(){};
+
 bool ProcessMgr::isAlive()
 {
 int res=waitpid(child_pid_,NULL,WNOHANG);//WNOHANG意思是不阻塞
@@ -54,4 +56,19 @@ return false;
 
 }
 }
+void ProcessMgr::stop()
+{std::string str="stop";
+    
+sendCommand(str);//显示发送stop
+waitpid( child_pid_,NULL,0);//等待子进程退出
+close(fd_in[1]);//关闭写端
+close(fd_out[0]);//关闭读端
 
+}
+void ProcessMgr::sendCommand(std::string&cmd)
+{std::string line = cmd + "\n";//因为指令服务是按照行读取的因此要进行加\n
+    const char*str=line.c_str();
+write(fd_in[1],str,strlen(str));
+
+
+} 
